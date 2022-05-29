@@ -22,7 +22,7 @@ data "aws_iam_policy_document" "ecs_task_policy" {
   statement {
     actions   = ["secretsmanager:GetSecretValue"]
     effect    = "Allow"
-    resources = [ aws_secretsmanager_secret.wordpress.arn ]
+    resources = [ aws_secretsmanager_secret.database_password_secret.arn ]
   }
   statement {
     actions   = ["kms:Decrypt"]

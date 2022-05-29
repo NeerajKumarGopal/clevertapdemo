@@ -43,5 +43,5 @@ output "rds_cluster_endpoint" {
 }
 
 output "secretsmanager_secret_arn" {
-  value = aws_secretsmanager_secret.wordpress.arn
+  value = aws_secretsmanager_secret.database_password_secret.arn
 }

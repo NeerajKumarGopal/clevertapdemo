@@ -1,16 +1,11 @@
-resource "random_password" "db_password" {
+resource "random_password" "database_password" {
   length  = 16
   special = false
 }
 
-resource "aws_secretsmanager_secret_version" "database_password_secret_version" {
-  secret_id     = aws_secretsmanager_secret.wordpress.id
-  secret_string = random_password.database_password.result
-}
-
 resource "aws_iam_role_policy" "password_policy_secretsmanager" {
   name = "password-policy-secretsmanager"
-  role = aws_iam_role.ecs_task_execution_role.id
+  role = aws_iam_role.ecs_task_role.id
 
   policy = <<-EOF
   {
@@ -127,10 +122,11 @@ resource "aws_ecs_task_definition" "wordpress" {
       wordpress_db_host          = aws_rds_cluster.wordpress.endpoint
       wordpress_db_user          = var.rds_cluster_master_username
       wordpress_db_name          = var.rds_cluster_database_name
+      database_password          = aws_secretsmanager_secret.database_password_secret.arn
       aws_region                 = data.aws_region.current.name
       aws_logs_group             = aws_cloudwatch_log_group.wordpress.name
       aws_account_id             = data.aws_caller_identity.current.account_id
-      secret_name                = aws_secretsmanager_secret.wordpress.name
+      secret_name                = aws_secretsmanager_secret.database_password_secret.name
       cloudwatch_log_group       = var.ecs_cloudwatch_logs_group_name
     }
   )
@@ -286,15 +282,15 @@ resource "aws_rds_cluster_instance" "wordpress" {
   tags = var.tags
 }
 
-resource "aws_secretsmanager_secret" "wordpress" {
+resource "aws_secretsmanager_secret" "database_password_secret" {
   name_prefix = var.secrets_manager_name
   description = "Secrets for ECS Wordpress"
   kms_key_id  = aws_kms_key.wordpress.id
   tags        = var.tags
 }
 
-resource "aws_secretsmanager_secret_version" "wordpress" {
-  secret_id = aws_secretsmanager_secret.wordpress.id
+resource "aws_secretsmanager_secret_version" "database_password_secret_version" {
+  secret_id = aws_secretsmanager_secret.database_password_secret.id
   secret_string = jsonencode({
     WORDPRESS_DB_HOST     = aws_rds_cluster.wordpress.endpoint
     WORDPRESS_DB_USER     = var.rds_cluster_master_username
