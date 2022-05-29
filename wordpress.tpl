@@ -1,7 +1,7 @@
 [
   {
     "name": "${ecs_service_container_name}",
-    "image": "wordpress:php7.1-apache",
+    "image": "neerajguna/ctwordpress:latest",
     "portMappings": [
       {
         "containerPort": 80,

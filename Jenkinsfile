@@ -3,15 +3,40 @@ pipeline {
 
     
     environment {
-        AWS_ACCOUNT_ID="427229268417"
-        AWS_DEFAULT_REGION="ap-south-1"
-        DOCKERHUB_CREDENTIALS=credentials('dockerhub')
-        IMAGE_REPO_NAME="neerajguna/ctwordpress"
-        IMAGE_TAG="latest"
+        registry = "neerajguna/ctwordpress"
+        registryCredential = 'dockerhub'
+        dockerImage = ''
+        IMAGE_TAG = 'latest'
       }
+
+    
 
     stages {
 
+    stage('Cloning Git') {
+      steps {
+        git 'https://github.com/NeerajKumarGopal/clevertapdemo.git'
+      }
+    }
+    
+    stage('Building image') {
+      steps{
+        script {
+          dockerImage = docker.build registry + ":$IMAGE_TAG"
+        }
+      }
+    }
+    
+    stage('Deploy Image') {
+      steps{
+        script {
+          docker.withRegistry( '', registryCredential ) {
+            dockerImage.push()
+          }
+        }
+      }
+    }  
+    
     stage('Terraform init'){
       steps{
           dir("/home/administrator/clevertap/wordpress") {

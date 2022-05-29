@@ -1,6 +1,4 @@
-FROM php:8.0-apache
-WORKDIR /var/www/html
-
-COPY index.php index.php
-COPY src/ src
+FROM wordpress:php7.1-apache
+WORKDIR /usr/src/wordpress
+COPY . /var/www/html
 EXPOSE 80
